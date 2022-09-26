@@ -1,0 +1,32 @@
+# Maintainer: Łaurent ʘ❢Ŧ Ŧough <laurent dot fough at gmail dot com>
+
+pkgname=zenmap
+_pkgname=nmap
+pkgver=7.93
+pkgrel=6
+pkgdesc="Graphical Nmap frontend and results viewer"
+url="https://nmap.org/"
+arch=("any")
+license=("GPL2")
+depends=("python>=3.0" "nmap" "python-gobject" "libffi7")
+makedepends=('python-setuptools')
+optdepends=("gksu: starting zenmap as root")
+source=("https://www.github.com/nmap/nmap")
+sha256sums=('SKIP')
+
+source=(
+		"${_pkgname}::git+https://github.com/kulikjak/nmap#branch=${BRANCH:-master-python3}"
+		)
+
+package() {
+	cd "${srcdir}/${_pkgname}/zenmap"
+	python setup.py install --prefix "/usr" --root="${pkgdir}" --optimize=1
+	rm "${pkgdir}/usr/bin/uninstall_zenmap"
+	ln -s zenmap "${pkgdir}/usr/bin/nmapfe"
+	ln -s zenmap "${pkgdir}/usr/bin/xnmap"
+	install -Dm644 ../docs/zenmap.1 "${pkgdir}/usr/share/man/man1/zenmap.1"
+
+	install -dm755 "${pkgdir}/usr/share/licenses/${pkgname}"
+	ln -s "../${_pkgname}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+	python -m compileall "${pkgdir}"/usr/lib/python3.10/site-packages
+}
